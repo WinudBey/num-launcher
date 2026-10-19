@@ -19,7 +19,7 @@ def run_cmd(cmd: list[str]) -> subprocess.CompletedProcess:
         subprocess.CompletedProcess: Komut çalışma sonucu.
     """
     print(f"-> {' '.join(cmd)}")
-    result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+    result = subprocess.run(cmd, capture_output=True, text=True, errors="replace")
     if result.stdout:
         print(result.stdout.strip())
     if result.returncode != 0:
