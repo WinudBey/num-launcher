@@ -16,6 +16,9 @@
       <button id="btn-trigger-double-enter" class="btn btn-primary" aria-label="Enter tuşuna çift basımı simüle et">
         Numpad Enter (x2) Simüle Et
       </button>
+      <button id="btn-open-settings" class="btn btn-secondary" aria-label="Ayarlar menüsünü aç">
+        ⚙️ Ayarlar
+      </button>
       <button id="btn-reset-log" class="btn btn-secondary">
         Günlüğü Temizle
       </button>
@@ -31,6 +34,7 @@
         <li>Sayı yazıldığında <strong>5 saniye</strong> sonra eylem otomatik uygulanır veya <strong>Enter</strong> ile hemen çalıştırılır.</li>
         <li><strong>Yukarı / Aşağı</strong> ok tuşlarıyla listede gezinin.</li>
         <li><strong>Esc</strong> tuşuna basarak veya yukarı kaydırarak (swipe) çubuğu kapatın.</li>
+        <li><strong>⚙️ Ayarlar</strong> butonuyla kısayol ekleyin, silin, düzenleyin ve sıralarını değiştirin.</li>
       </ul>
     </section>
 
@@ -54,6 +58,7 @@
             aria-label="Komut arama ve sayı giriş alanı"
           />
           <span id="countdown-badge" class="badge-timer hidden" aria-live="polite">⏱ 5s</span>
+          <button id="btn-bar-settings" class="btn-icon-settings" aria-label="Kısayol Ayarları" title="Kısayol Ayarları">⚙️</button>
           <kbd class="kbd-hint" aria-hidden="true">ESC: Kapat</kbd>
         </div>
 
@@ -75,6 +80,77 @@
         <div class="log-entry system">[SİSTEM] Yerel önizleme hazır. Dinleme aktif.</div>
       </div>
     </section>
+
+    <!-- Ayarlar Modalı -->
+    <div id="settings-modal" class="modal-container hidden" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+      <div class="modal-backdrop" id="settings-backdrop"></div>
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h2 id="settings-modal-title">⚙️ Kısayol ve Eylem Ayarları</h2>
+          <button id="btn-close-settings-x" class="btn-close" aria-label="Ayarları kapat">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">Kısayolları elle ekleyin, silin, düzenleyin veya ok butonlarıyla sırasını değiştirin.</p>
+          
+          <!-- Kısayol Tablosu -->
+          <div class="shortcuts-table-wrapper">
+            <table class="shortcuts-table" aria-label="Mevcut kısayollar listesi">
+              <thead>
+                <tr>
+                  <th style="width: 40px; text-align: center;">#</th>
+                  <th style="width: 70px; text-align: center;">Kod</th>
+                  <th>Başlık</th>
+                  <th style="width: 70px; text-align: center;">Tür</th>
+                  <th>Komut / URL</th>
+                  <th style="width: 140px; text-align: center;">İşlemler</th>
+                </tr>
+              </thead>
+              <tbody id="shortcuts-tbody">
+                <!-- JS ile dinamik oluşturulur -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Kısayol Ekle / Düzenle Formu -->
+          <div class="shortcut-form-card">
+            <h3 id="form-heading">Yeni Kısayol Ekle</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="input-code">Sayı / Kod:</label>
+                <input type="text" id="input-code" placeholder="Örn: 9, 42" autocomplete="off" />
+              </div>
+              <div class="form-group">
+                <label for="input-title">Başlık:</label>
+                <input type="text" id="input-title" placeholder="Örn: VS Code" autocomplete="off" />
+              </div>
+              <div class="form-group">
+                <label for="select-type">Tür:</label>
+                <select id="select-type">
+                  <option value="cmd">cmd</option>
+                  <option value="url">url</option>
+                </select>
+              </div>
+              <div class="form-group full-width">
+                <label for="input-desc">Açıklama:</label>
+                <input type="text" id="input-desc" placeholder="Örn: Kod düzenleyiciyi açar" autocomplete="off" />
+              </div>
+              <div class="form-group full-width">
+                <label for="input-cmd">Komut / URL:</label>
+                <input type="text" id="input-cmd" placeholder="Örn: code.exe veya https://github.com" autocomplete="off" />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button id="btn-cancel-edit" class="btn btn-secondary hidden" type="button">İptal</button>
+              <button id="btn-save-shortcut" class="btn btn-primary" type="button">➕ Listeye Ekle</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-save-settings" class="btn btn-primary" type="button">💾 Ayarları Kaydet</button>
+          <button id="btn-close-settings" class="btn btn-secondary" type="button">Kapat</button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script src="preview.js"></script>

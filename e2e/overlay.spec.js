@@ -193,5 +193,117 @@ test.describe("Num Launcher E2E ve Görsel Doğrulama Testleri", () => {
     await expect(logOutput).toContainText("[AKSİYON TETİKLENDİ] Kod: \"1\" | Başlık: \"Hesap Makinesi\"");
   });
 
+  test("Ayarlar menüsü açılmalı, kısayol tablosu listelenmeli ve ekran görüntüsü alınmalı", async ({ page }) => {
+    await page.goto(PREVIEW_URL);
+
+    // Ayarlar butonuna tıkla
+    const settingsBtn = page.getByRole("button", { name: "Ayarlar menüsünü aç" });
+    await expect(settingsBtn).toBeVisible();
+    await settingsBtn.click();
+
+    // Ayarlar modalı görünür olmalı
+    const modal = page.locator("#settings-modal");
+    await expect(modal).toBeVisible();
+
+    // Kısayol tablosunda en az 6 satır olmalı
+    const rows = page.locator("#shortcuts-tbody tr");
+    await expect(rows).toHaveCount(6);
+
+    // Ayarlar menüsü ekran görüntüsü al
+    const settingsScreenshot = path.join(SCREENSHOTS_DIR, "07_settings_modal.png");
+    await page.screenshot({ path: settingsScreenshot, fullPage: true });
+    expect(fs.existsSync(settingsScreenshot)).toBeTruthy();
+
+    // Kapat butonuna bas
+    await page.locator("#btn-close-settings").click();
+    await expect(modal).toBeHidden();
+  });
+
+  test("Yeni kısayol elle eklenmeli, kaydedilmeli ve komut çubuğunda kullanılabilmeli", async ({ page }) => {
+    await page.goto(PREVIEW_URL);
+
+    // Ayarları aç
+    await page.locator("#btn-open-settings").click();
+    const modal = page.locator("#settings-modal");
+    await expect(modal).toBeVisible();
+
+    // Formu doldur
+    await page.locator("#input-code").fill("8");
+    await page.locator("#input-title").fill("Spotify Müzik");
+    await page.locator("#input-desc").fill("Spotify uygulamasını açar.");
+    await page.locator("#select-type").selectOption("cmd");
+    await page.locator("#input-cmd").fill("spotify.exe");
+
+    // "Listeye Ekle" butonuna bas
+    await page.locator("#btn-save-shortcut").click();
+
+    // Tabloda yeni öğe (7. satır) görünmeli
+    const rows = page.locator("#shortcuts-tbody tr");
+    await expect(rows).toHaveCount(7);
+    await expect(page.locator("#shortcuts-tbody")).toContainText("Spotify Müzik");
+
+    // Ayarları kaydet
+    await page.locator("#btn-save-settings").click();
+    await expect(modal).toBeHidden();
+
+    // Komut çubuğunu aç
+    await page.locator("#btn-trigger-double-enter").click();
+    const overlay = page.getByRole("dialog", { name: "Numpad Komut Çubuğu" });
+    await expect(overlay).toBeVisible();
+
+    // "8" yaz
+    const input = page.getByRole("combobox", { name: "Komut arama ve sayı giriş alanı" });
+    await input.fill("8");
+
+    // Yeni kısayol önerisi görünmeli
+    const spotifyOption = page.locator("#action-list .action-item", { hasText: "Spotify Müzik" });
+    await expect(spotifyOption).toBeVisible();
+
+    // Ekran görüntüsü al
+    const newActionScreenshot = path.join(SCREENSHOTS_DIR, "08_new_shortcut_used.png");
+    await page.screenshot({ path: newActionScreenshot, fullPage: true });
+    expect(fs.existsSync(newActionScreenshot)).toBeTruthy();
+
+    // Enter'a basarak çalıştır
+    await input.press("Enter");
+    await expect(overlay).toBeHidden();
+
+    // Sistem günlüğünde çalıştığı doğrulanmalı
+    const logOutput = page.getByRole("log");
+    await expect(logOutput).toContainText("[AKSİYON TETİKLENDİ] Kod: \"8\" | Başlık: \"Spotify Müzik\"");
+  });
+
+  test("Kısayol sırası ok butonlarıyla değiştirilebilmeli", async ({ page }) => {
+    await page.goto(PREVIEW_URL);
+
+    // Ayarları aç
+    await page.locator("#btn-open-settings").click();
+    await expect(page.locator("#settings-modal")).toBeVisible();
+
+    // 2. sıradaki elemanın (Not Defteri) yukarı ok butonuna tıkla
+    const secondRowUpBtn = page.locator("#shortcuts-tbody tr:nth-child(2) .btn-up");
+    await secondRowUpBtn.click();
+
+    // Şimdi 1. satır "Not Defteri" olmalı
+    const firstRowText = await page.locator("#shortcuts-tbody tr:nth-child(1)").textContent();
+    expect(firstRowText).toContain("Not Defteri");
+
+    // Sıralama değişikliği ekran görüntüsü al
+    const reorderedScreenshot = path.join(SCREENSHOTS_DIR, "09_shortcut_reordered.png");
+    await page.screenshot({ path: reorderedScreenshot, fullPage: true });
+    expect(fs.existsSync(reorderedScreenshot)).toBeTruthy();
+
+    // Ayarları kaydet
+    await page.locator("#btn-save-settings").click();
+    await expect(page.locator("#settings-modal")).toBeHidden();
+
+    // Komut çubuğunu aç
+    await page.locator("#btn-trigger-double-enter").click();
+    // Komut çubuğundaki ilk öneri Not Defteri olmalı
+    const firstActionItem = page.locator("#action-list .action-item:first-child");
+    await expect(firstActionItem).toContainText("Not Defteri");
+  });
+
 });
+
 

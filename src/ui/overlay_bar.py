@@ -9,6 +9,7 @@ import time
 import tkinter as tk
 from tkinter import font as tkfont
 from typing import Any, Callable, Dict, List, Optional
+from src.config.config_manager import ConfigManager
 from src.core.action_registry import ActionExecutionResult, ActionRegistry
 from src.core.display_detector import calculate_centered_window_position
 from src.utils.logger import get_logger
@@ -23,7 +24,8 @@ class OverlayBar:
         self,
         registry: ActionRegistry,
         config: Dict[str, Any],
-        on_action_executed: Optional[Callable[[ActionExecutionResult], None]] = None
+        on_action_executed: Optional[Callable[[ActionExecutionResult], None]] = None,
+        config_manager: Optional[ConfigManager] = None
     ) -> None:
         """OverlayBar sınıfını başlatır.
 
@@ -31,10 +33,13 @@ class OverlayBar:
             registry: Aksiyon eşleştirme ve yürütme nesnesi.
             config: Görsel ve davranış yapılandırması.
             on_action_executed: Aksiyon çalıştırıldığında çağrılacak geribildirim fonksiyonu.
+            config_manager: Yapılandırma yöneticisi nesnesi.
         """
         self.registry = registry
         self.config = config
+        self.config_manager = config_manager or ConfigManager()
         self.on_action_executed = on_action_executed
+        self.settings_window: Optional[Any] = None
 
         ui_conf = config.get("ui", {})
         self.base_width = int(ui_conf.get("width", 640))
@@ -115,7 +120,25 @@ class OverlayBar:
             padx=6,
             pady=2
         )
-        self.timer_lbl.pack(side=tk.RIGHT, padx=(6, 0))
+        self.timer_lbl.pack(side=tk.RIGHT, padx=(4, 0))
+
+        # Ayarlar Butonu (⚙️)
+        self.btn_settings = tk.Button(
+            input_frame,
+            text="⚙️",
+            bg=self.theme.get("input_bg", "#1e1e2e"),
+            fg=self.theme.get("accent_color", "#89b4fa"),
+            activebackground=self.theme.get("selected_bg", "#45475a"),
+            activeforeground="#ffffff",
+            relief=tk.FLAT,
+            bd=0,
+            font=("Segoe UI", 11),
+            cursor="hand2",
+            padx=4,
+            pady=2,
+            command=self.open_settings
+        )
+        self.btn_settings.pack(side=tk.RIGHT, padx=(4, 0))
 
         # İlerleme Çubuğu Tuvali (3 px modern dolum çizgisi)
         self.progress_canvas = tk.Canvas(
@@ -189,10 +212,35 @@ class OverlayBar:
         else:
             self.show()
 
+    def open_settings(self) -> None:
+        """Ayarlar penceresini açar."""
+        self._cancel_auto_execute_timer()
+        if self.settings_window and self.settings_window.window and self.settings_window.window.winfo_exists():
+            self.settings_window.window.lift()
+            self.settings_window.window.focus_force()
+            return
+
+        from src.ui.settings_window import SettingsWindow
+        self.settings_window = SettingsWindow(
+            parent=self.root,
+            config_manager=self.config_manager,
+            on_actions_updated=self._on_actions_updated
+        )
+
+    def _on_actions_updated(self, new_actions: List[Dict[str, Any]]) -> None:
+        """Ayarlar penceresinden kaydedilen yeni eylemleri komut motoruna uygular."""
+        self.registry.set_actions(new_actions)
+        self._refresh_action_list()
+        logger.info("OverlayBar eylem listesi güncellendi. Toplam eleman: %d", len(new_actions))
+
     def _on_focus_out(self, event: Any) -> None:
         """Pencere odağını kaybettiğinde gizler."""
         # Açılış anındaki geçici odak kaybını engelle (0.3 sn tolerans)
         if hasattr(self, "_opened_at") and (time.time() - self._opened_at < 0.3):
+            return
+
+        # Ayarlar penceresi açıkken çubuğu kapatma
+        if self.settings_window and self.settings_window.window and self.settings_window.window.winfo_exists():
             return
 
         if self.root and self.root.focus_get() is None:

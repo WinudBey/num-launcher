@@ -32,6 +32,7 @@ def main() -> None:
     overlay = OverlayBar(
         registry=registry,
         config=config,
+        config_manager=config_mgr,
         on_action_executed=lambda res: logger.info("Aksiyon tamamlandı: %s", res)
     )
 

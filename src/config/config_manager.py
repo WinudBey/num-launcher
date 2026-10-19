@@ -159,6 +159,128 @@ class ConfigManager:
                 return action
         return None
 
+    @staticmethod
+    def validate_action(action: Dict[str, Any]) -> bool:
+        """Eylem nesnesinin geçerli alanlara sahip olduğunu doğrular.
+
+        Args:
+            action: Doğrulanacak eylem sözlüğü.
+
+        Returns:
+            bool: Geçerli ise True, aksi halde False.
+        """
+        if not isinstance(action, dict):
+            return False
+        code = str(action.get("code", "")).strip()
+        title = str(action.get("title", "")).strip()
+        act_type = str(action.get("type", "")).strip().lower()
+        command = str(action.get("command", "")).strip()
+
+        if not code or not title or not command:
+            return False
+        if act_type not in ("cmd", "url"):
+            return False
+        return True
+
+    def set_actions(self, actions: List[Dict[str, Any]]) -> bool:
+        """Tüm eylem listesini yenisiyle değiştirir ve diske kaydeder.
+
+        Args:
+            actions: Yeni eylem listesi.
+
+        Returns:
+            bool: İşlem başarılı ise True.
+        """
+        for act in actions:
+            if not self.validate_action(act):
+                logger.error("Geçersiz eylem tespit edildi: %s", act)
+                return False
+
+        self._data["actions"] = list(actions)
+        return self.save()
+
+    def add_action(self, action: Dict[str, Any]) -> bool:
+        """Yeni bir eylem ekler ve diske kaydeder.
+
+        Args:
+            action: Eklenecek eylem sözlüğü.
+
+        Returns:
+            bool: Başarılı ise True.
+        """
+        if not self.validate_action(action):
+            logger.error("Eylem eklenemedi, doğrulama başarısız: %s", action)
+            return False
+
+        actions = self._data.setdefault("actions", [])
+        actions.append(action)
+        return self.save()
+
+    def update_action(self, index: int, action: Dict[str, Any]) -> bool:
+        """Belirtilen indeksteki eylemi günceller ve kaydeder.
+
+        Args:
+            index: Güncellenecek eylemin indeksi.
+            action: Yeni eylem verisi.
+
+        Returns:
+            bool: Başarılı ise True.
+        """
+        actions = self.get_actions()
+        if not (0 <= index < len(actions)):
+            logger.error("Geçersiz eylem indeksi: %d (Toplam: %d)", index, len(actions))
+            return False
+
+        if not self.validate_action(action):
+            logger.error("Eylem güncellenemedi, geçersiz veri: %s", action)
+            return False
+
+        actions[index] = action
+        self._data["actions"] = actions
+        return self.save()
+
+    def delete_action(self, index: int) -> bool:
+        """Belirtilen indeksteki eylemi siler ve kaydeder.
+
+        Args:
+            index: Silinecek eylemin indeksi.
+
+        Returns:
+            bool: Başarılı ise True.
+        """
+        actions = self.get_actions()
+        if not (0 <= index < len(actions)):
+            logger.error("Silinecek eylem indeksi geçersiz: %d", index)
+            return False
+
+        actions.pop(index)
+        self._data["actions"] = actions
+        return self.save()
+
+    def move_action(self, from_index: int, to_index: int) -> bool:
+        """Eylemin sırasını değiştirir ve kaydeder.
+
+        Args:
+            from_index: Mevcut indeks.
+            to_index: Hedef indeks.
+
+        Returns:
+            bool: Başarılı ise True.
+        """
+        actions = self.get_actions()
+        n = len(actions)
+        if not (0 <= from_index < n) or not (0 <= to_index < n):
+            logger.error("Sıralama indeksleri sınır dışı: %d -> %d (Boyut: %d)", from_index, to_index, n)
+            return False
+
+        if from_index == to_index:
+            return True
+
+        item = actions.pop(from_index)
+        actions.insert(to_index, item)
+        self._data["actions"] = actions
+        return self.save()
+
     def _merge_defaults(self, custom: Dict[str, Any], defaults: Dict[str, Any]) -> Dict[str, Any]:
         """Eksik anahtarları varsayılanlarla doldurur (Kalıtım ve SSOT)."""
         result = dict(defaults)
