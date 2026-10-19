@@ -1,0 +1,58 @@
+name: Otomatik Release Yayini
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Sürüm Paketi Oluştur ve Yayınla
+    runs-on: windows-latest
+
+    steps:
+      - name: Kodu Çek (Checkout)
+        uses: actions/checkout@v4
+
+      - name: Python Kurulumu
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Birim Testleri Çalıştır
+        run: |
+          python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Dağıtım ZIP Arşivini Hazırla
+        shell: pwsh
+        run: |
+          $tag = if ($env:GITHUB_REF_NAME) { $env:GITHUB_REF_NAME } else { "latest" }
+          $zipName = "num-launcher-$tag.zip"
+          
+          # Gereksiz dosyaları hariç tutarak arşiv oluştur
+          $exclude = @('.git', 'node_modules', 'test-results', '.github', '__pycache__', 'screenshots')
+          $files = Get-ChildItem -Path . -Exclude $exclude
+          Compress-Archive -Path $files -DestinationPath $zipName -Force
+          Write-Host "ZIP arşivi hazırlandı: $zipName"
+
+      - name: GitHub Release Yayınla
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Num Launcher ${{ github.ref_name }}"
+          body: |
+            ### 🚀 Num Launcher Otomatik Sürüm Dağıtımı (${{ github.ref_name }})
+            
+            Bu sürüm otomatik olarak derlenmiş ve yayınlanmıştır.
+            
+            #### 📦 Kurulum ve Çalıştırma:
+            1. Ekteki `num-launcher-*.zip` arşivini indirin ve bir klasöre çıkartın.
+            2. `python main.py` komutunu çalıştırın.
+            3. Klavyenizin **Numpad Enter** tuşuna iki kez hızlıca basarak arayüzü açın.
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: num-launcher-*.zip

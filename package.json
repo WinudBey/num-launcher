@@ -1,0 +1,14 @@
+{
+  "name": "num-launcher",
+  "version": "1.0.0",
+  "description": "Numpad Enter ile tetiklenen monitör odaklı hızlı komut başlatıcı",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "verify": "python verify.py",
+    "push": "python scripts/git_push.py"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
+  }
+}
+

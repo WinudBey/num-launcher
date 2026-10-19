@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Num Launcher - Yerel Önizleme ve Test Alanı</title>
+  <link rel="stylesheet" href="preview.css">
+</head>
+<body>
+  <div class="sandbox-header">
+    <div class="header-content">
+      <h1>Num Launcher Yerel Önizleme (Sandbox)</h1>
+      <p>Bu sayfa Num Launcher'ın masaüstü davranışını doğrudan tarayıcıda simüle eder.</p>
+    </div>
+    <div class="simulation-controls">
+      <button id="btn-trigger-double-enter" class="btn btn-primary" aria-label="Enter tuşuna çift basımı simüle et">
+        Numpad Enter (x2) Simüle Et
+      </button>
+      <button id="btn-reset-log" class="btn btn-secondary">
+        Günlüğü Temizle
+      </button>
+    </div>
+  </div>
+
+  <main class="sandbox-main">
+    <section class="info-card">
+      <h2>Kullanım Talimatları</h2>
+      <ul>
+        <li>Klavyede <strong>Enter</strong> tuşuna iki kez hızlıca basın veya yukarıdaki butona tıklayın.</li>
+        <li>Açılan çubuğa numpad'den sayı (örn: <code>1</code>, <code>2</code>, <code>4</code>) yazın.</li>
+        <li>Sayı yazıldığında <strong>5 saniye</strong> sonra eylem otomatik uygulanır veya <strong>Enter</strong> ile hemen çalıştırılır.</li>
+        <li><strong>Yukarı / Aşağı</strong> ok tuşlarıyla listede gezinin.</li>
+        <li><strong>Esc</strong> tuşuna basarak veya yukarı kaydırarak (swipe) çubuğu kapatın.</li>
+      </ul>
+    </section>
+
+    <!-- Overlay Bar Bileşeni -->
+    <div id="overlay-container" class="overlay-container hidden" role="dialog" aria-modal="true" aria-label="Numpad Komut Çubuğu">
+      <div class="overlay-backdrop" id="overlay-backdrop"></div>
+      
+      <div class="command-bar" id="command-bar">
+        <div class="command-input-wrapper">
+          <span class="badge-num" aria-hidden="true">NUM</span>
+          <input
+            type="text"
+            id="command-input"
+            class="command-input"
+            placeholder="Sayı girin (örn: 1, 2, 4) veya komut arayın..."
+            autocomplete="off"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded="true"
+            aria-controls="action-list"
+            aria-label="Komut arama ve sayı giriş alanı"
+          />
+          <span id="countdown-badge" class="badge-timer hidden" aria-live="polite">⏱ 5s</span>
+          <kbd class="kbd-hint" aria-hidden="true">ESC: Kapat</kbd>
+        </div>
+
+        <!-- 5 Saniye Dolan Animasyon Çizgisi -->
+        <div class="progress-bar-track" aria-hidden="true">
+          <div id="progress-bar-fill" class="progress-bar-fill"></div>
+        </div>
+
+        <ul id="action-list" class="action-list" role="listbox" aria-label="Kullanılabilir eylemler">
+          <!-- Dinamik olarak JS ile doldurulur -->
+        </ul>
+      </div>
+    </div>
+
+    <!-- Simülasyon Çıktı Günlüğü -->
+    <section class="log-section">
+      <h3>Sistem ve Olay Günlüğü</h3>
+      <div id="log-output" class="log-output" role="log" aria-live="polite">
+        <div class="log-entry system">[SİSTEM] Yerel önizleme hazır. Dinleme aktif.</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="preview.js"></script>
+</body>
+</html>

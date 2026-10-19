@@ -1,0 +1,67 @@
+{
+    "version": "1.0.0",
+    "hotkey": {
+        "key_type": "numpad_enter",
+        "double_tap_threshold_ms": 400,
+        "allow_standard_enter": true
+    },
+    "ui": {
+        "width": 640,
+        "height": 72,
+        "expanded_height": 380,
+        "auto_execute_delay_sec": 5,
+        "theme": {
+            "bg_color": "#181825",
+            "border_color": "#313244",
+            "input_bg": "#1e1e2e",
+            "text_color": "#cdd6f4",
+            "placeholder_color": "#6c7086",
+            "accent_color": "#89b4fa",
+            "selected_bg": "#45475a"
+        }
+    },
+    "actions": [
+        {
+            "code": "1",
+            "title": "Hesap Makinesi",
+            "description": "Windows Hesap Makinesi uygulamasını açar.",
+            "type": "cmd",
+            "command": "calc.exe"
+        },
+        {
+            "code": "2",
+            "title": "Not Defteri",
+            "description": "Hızlı not almak için Notepad açar.",
+            "type": "cmd",
+            "command": "notepad.exe"
+        },
+        {
+            "code": "3",
+            "title": "Görev Yöneticisi",
+            "description": "Windows Görev Yöneticisini başlatır.",
+            "type": "cmd",
+            "command": "taskmgr.exe"
+        },
+        {
+            "code": "4",
+            "title": "Tarayıcı - Google",
+            "description": "Varsayılan tarayıcıda Google ana sayfasını açar.",
+            "type": "url",
+            "command": "https://www.google.com"
+        },
+        {
+            "code": "5",
+            "title": "Terminal (PowerShell)",
+            "description": "Windows PowerShell penceresi açar.",
+            "type": "cmd",
+            "command": "powershell.exe"
+        },
+        {
+            "code": "0",
+            "title": "Ekranı Kilitle",
+            "description": "Oturumu güvenli bir şekilde kilitler.",
+            "type": "cmd",
+            "command": "rundll32.exe user32.dll,LockWorkStation"
+        }
+    ]
+}
